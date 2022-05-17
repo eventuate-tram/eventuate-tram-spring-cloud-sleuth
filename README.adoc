@@ -1,0 +1,3 @@
+# Eventuate Tram - Spring Cloud Sleuth Integration
+
+This repository defines modules that enable Spring Cloud Sleuth to capture Eventuate Tram message flows.

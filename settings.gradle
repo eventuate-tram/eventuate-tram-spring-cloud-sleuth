@@ -1,0 +1,2 @@
+include 'eventuate-tram-spring-cloud-sleuth-tram'
+include 'eventuate-tram-spring-cloud-sleuth-bom'

@@ -1,0 +1,40 @@
+version: 2
+jobs:
+  build:
+    machine: true
+    working_directory: ~/eventuate-tram-spring-cloud-sleuth
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - eventuate-tram-spring-cloud-sleuth-{{ checksum "gradle.properties" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+            - eventuate-tram-spring-cloud-sleuth-
+      - run: TERM=dumb ./gradlew testClasses aggregateJavaDocs
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: eventuate-tram-spring-cloud-sleuth-{{ checksum "gradle.properties" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+      - run: TERM=dumb ./gradlew build
+      - run:
+          name: Publish artifacts
+          command: |
+            TERM=dumb ./gradlew  publishEventuateArtifacts
+          when: on_success
+      - run:
+          name: Save test results
+          command: |
+            TERM=dumb ./.circleci/save-containers-and-tests.sh
+          when: always
+      - store_test_results:
+          path: ~/junit
+      - store_artifacts:
+          path: ~/junit
+      - store_artifacts:
+          path: ~/container-logs
+workflows:
+  version: 2
+  build-test-and-deploy:
+    jobs:
+      - build:
+          context:
+            - publish

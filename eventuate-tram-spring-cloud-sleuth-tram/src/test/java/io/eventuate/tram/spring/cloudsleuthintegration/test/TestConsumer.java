@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 @Component
 public class TestConsumer {
 
-  private Logger logger = LoggerFactory.getLogger(getClass());
+  private final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Autowired
   private MessageConsumer messageConsumer;
@@ -33,7 +33,7 @@ public class TestConsumer {
   }
 
   private void messageHandler(Message message) {
-    logger.info("received message {}" , message);
+    logger.debug("received message {}" , message);
     TestMessage testMessage = JSonMapper.fromJson(message.getPayload(), TestMessage.class);
 
     ResponseEntity<String> result = restTemplate.postForEntity(String.format("http://localhost:%s/bar", testMessage

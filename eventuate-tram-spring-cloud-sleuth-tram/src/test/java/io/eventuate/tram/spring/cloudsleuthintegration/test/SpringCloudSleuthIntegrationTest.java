@@ -2,7 +2,7 @@ package io.eventuate.tram.spring.cloudsleuthintegration.test;
 
 import io.eventuate.tram.spring.inmemory.TramInMemoryConfiguration;
 import io.eventuate.util.test.async.Eventually;
-import org.junit.Assert;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -26,6 +26,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -37,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @Testcontainers
 public class SpringCloudSleuthIntegrationTest {
 
-  private Logger logger = LoggerFactory.getLogger(getClass());
+  private final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Configuration
   @SpringBootApplication
@@ -60,7 +61,7 @@ public class SpringCloudSleuthIntegrationTest {
   private RestTemplate restTemplate;
 
   @Container
-  static private GenericContainer<?> zipkin = new GenericContainer<>(DockerImageName.parse("openzipkin/zipkin:2.23"))
+  static private final GenericContainer<?> zipkin = new GenericContainer<>(DockerImageName.parse("openzipkin/zipkin:2.23"))
           .withExposedPorts(9411);
 
   @DynamicPropertySource
@@ -74,11 +75,9 @@ public class SpringCloudSleuthIntegrationTest {
     ResponseEntity<String> result = restTemplate.postForEntity(String.format("http://localhost:%s/foo/%s",
             port, id),
             new TestMessage(port), String.class);
-    Assert.assertEquals(HttpStatus.OK, result.getStatusCode());
+    Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
 
-    Eventually.eventually(() -> {
-      assertTracesSendToZipkin(id);
-    });
+    Eventually.eventually(() -> assertTracesSendToZipkin(id));
   }
 
   private void assertTracesSendToZipkin(String id)  {
@@ -87,7 +86,7 @@ public class SpringCloudSleuthIntegrationTest {
             ("%sapi/v2/traces?annotationQuery=http.path=/foo/%s",
                     zipkinBaseUrl, id);
 
-    logger.info("Retrieving traces {}", url);
+    logger.debug("Retrieving traces {}", url);
 
     ResponseEntity<String> result = restTemplate.getForEntity(url, String.class);
 
@@ -99,14 +98,25 @@ public class SpringCloudSleuthIntegrationTest {
     assertEquals(1, traces.size());
 
     List<ZipkinSpan> trace = traces.get(0);
-    ZipkinSpan parentSpan = trace.stream().filter(s -> s.hasTag("http.path", "/foo/" + id)).findFirst().get();
-    ZipkinSpan sendSpan = trace.stream().filter(s -> s.hasName("dosend testchannel")).findFirst().get();
+    ZipkinSpan parentSpan = findRequiredSpanByHttpPathTag(trace, "/foo/" + id);
+    ZipkinSpan sendSpan = findRequiredSpanByName(trace, "dosend testchannel");
+    ZipkinSpan receiveSpan = findRequiredSpanByName(trace, "receive testchannel");
+    ZipkinSpan barPostSpan = findRequiredSpanByHttpPathTag(trace, "/bar");
+
     assertChildOf(parentSpan, sendSpan);
-    ZipkinSpan receiveSpan = trace.stream().filter(s -> s.hasName("receive testchannel")).findFirst().get();
     assertChildOf(sendSpan, receiveSpan);
-    ZipkinSpan barPostSpan = trace.stream().filter(s -> s.hasTag("http.path", "/bar")).findFirst().get();
     assertChildOf(receiveSpan, barPostSpan);
 
+  }
+
+  @NotNull
+  private ZipkinSpan findRequiredSpanByName(List<ZipkinSpan> trace, String name) {
+    return findRequiredSpan(trace, s -> s.hasName(name));
+  }
+
+  @NotNull
+  private ZipkinSpan findRequiredSpanByHttpPathTag(List<ZipkinSpan> trace, String path) {
+    return findRequiredSpan(trace, s -> s.hasTag("http.path", path));
   }
 
   private void assertChildOf(ZipkinSpan parent, ZipkinSpan span) {
@@ -115,4 +125,10 @@ public class SpringCloudSleuthIntegrationTest {
               .getParentId()));
     }
   }
+
+  @NotNull
+  private ZipkinSpan findRequiredSpan(List<ZipkinSpan> trace, Predicate<ZipkinSpan> predicate) {
+    return trace.stream().filter(predicate).findFirst().orElseThrow(() -> new RuntimeException("Span not found"));
+  }
+
 }

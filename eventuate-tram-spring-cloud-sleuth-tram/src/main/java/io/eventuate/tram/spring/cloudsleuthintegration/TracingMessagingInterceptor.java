@@ -20,7 +20,7 @@ public class TracingMessagingInterceptor implements MessageInterceptor, MessageH
 
   @Override
   public void preSend(Message message) {
-    spanHelper.logger.info("preSend {}", message.getHeaders());
+    spanHelper.logger.debug("preSend {}", message.getHeaders());
     MessageHeaderAccessor headers = spanHelper.makeMessageHeaderAccessor(message);
     org.springframework.cloud.sleuth.Span span = spanHelper.nextSpan(spann -> {
       spann.name("doSend " + message.getRequiredHeader(Message.DESTINATION));
@@ -40,7 +40,6 @@ public class TracingMessagingInterceptor implements MessageInterceptor, MessageH
 
   @Override
   public void postSend(Message message, Exception e) {
-    System.out.println("postSend()");
     this.spanHelper.threadLocalSpan.get().getSpan().tag("message.ID", message.getId());
     spanHelper.finishSpan(e);
   }
@@ -57,7 +56,7 @@ public class TracingMessagingInterceptor implements MessageInterceptor, MessageH
 
     Message message = subscriberIdAndMessage.getMessage();
 
-    spanHelper.logger.info("preHandle {}", message.getHeaders());
+    spanHelper.logger.debug("preHandle {}", message.getHeaders());
 
     MessageHeaderAccessor headers = spanHelper.makeMessageHeaderAccessor(message);
 
@@ -75,7 +74,6 @@ public class TracingMessagingInterceptor implements MessageInterceptor, MessageH
       throwable = e;
       throw e;
     } finally {
-      System.out.println("postHandle()");
       spanHelper.finishSpan(throwable);
     }
   }

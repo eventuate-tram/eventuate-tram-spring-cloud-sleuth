@@ -39,24 +39,24 @@ public class SpanHelper {
     threadLocalSpan.set(span);
     spanCustomizer.accept(span);
     span.start();
-    logger.info("preSend newSpan {}", span);
-    logger.info("preSend currentSpan {}", tracer.currentSpan());
+    logger.debug("preSend newSpan {}", span);
+    logger.debug("preSend currentSpan {}", tracer.currentSpan());
     return span;
   }
 
   void finishSpan(Throwable error) {
-    logger.info("finishSpan tracer.currentSpan {}", tracer.currentSpan());
+    logger.debug("finishSpan tracer.currentSpan {}", tracer.currentSpan());
     SpanAndScope spanAndScope = threadLocalSpan.get();
     Span span = spanAndScope.getSpan();
     threadLocalSpan.remove();
-    logger.info("actual span {}", span);
+    logger.debug("actual span {}", span);
     if (span == null)
       return;
     if (error != null) { // an error occurred, adding error to span
       span.error(error);
     }
     spanAndScope.close();
-    logger.info("finishSpan currentSpan {}", tracer.currentSpan());
+    logger.debug("finishSpan currentSpan {}", tracer.currentSpan());
   }
 
   MessageHeaderAccessor makeMessageHeaderAccessor(Message message) {
@@ -87,8 +87,8 @@ public class SpanHelper {
 
     threadLocalSpan.set(span);
 
-    logger.info("preHandle newSpan {}", span);
-    logger.info("preHandle currentSpan {}", tracer.currentSpan());
+    logger.debug("preHandle newSpan {}", span);
+    logger.debug("preHandle currentSpan {}", tracer.currentSpan());
 
     return span;
   }

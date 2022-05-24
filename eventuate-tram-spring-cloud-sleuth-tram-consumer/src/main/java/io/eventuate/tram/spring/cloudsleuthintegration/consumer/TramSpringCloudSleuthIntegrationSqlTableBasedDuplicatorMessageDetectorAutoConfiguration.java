@@ -1,0 +1,10 @@
+package io.eventuate.tram.spring.cloudsleuthintegration.consumer;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+
+@Configuration
+@Import(TramSpringCloudSleuthIntegrationSqlTableBasedDuplicatorMessageDetectorConfiguration.class)
+public class TramSpringCloudSleuthIntegrationSqlTableBasedDuplicatorMessageDetectorAutoConfiguration {
+
+}

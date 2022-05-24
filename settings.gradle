@@ -1,2 +1,6 @@
-include 'eventuate-tram-spring-cloud-sleuth-tram'
+include 'eventuate-tram-spring-cloud-sleuth-tram-common'
+include 'eventuate-tram-spring-cloud-sleuth-tram-producer'
+include 'eventuate-tram-spring-cloud-sleuth-tram-consumer'
+include 'eventuate-tram-spring-cloud-sleuth-tram-starter'
+include 'eventuate-tram-spring-cloud-sleuth-tram-tests'
 include 'eventuate-tram-spring-cloud-sleuth-bom'

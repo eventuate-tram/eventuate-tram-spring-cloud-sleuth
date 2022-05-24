@@ -1,0 +1,6 @@
+dependencies {
+    compile 'org.springframework.cloud:spring-cloud-starter-sleuth'
+    implementation 'org.springframework.cloud:spring-cloud-sleuth-zipkin'
+    compileOnly "io.eventuate.tram.core:eventuate-tram-messaging"
+}
+

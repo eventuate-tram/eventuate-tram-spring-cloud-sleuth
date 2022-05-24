@@ -1,0 +1,15 @@
+dependencies {
+    compile project(":eventuate-tram-spring-cloud-sleuth-tram-producer")
+    compile project(":eventuate-tram-spring-cloud-sleuth-tram-consumer")
+
+    testImplementation "org.springframework.cloud:spring-cloud-starter-sleuth"
+    testImplementation "org.springframework.boot:spring-boot-starter-web"
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+
+    testImplementation "io.eventuate.tram.core:eventuate-tram-spring-in-memory"
+    testImplementation "io.eventuate.util:eventuate-util-test:$eventuateUtilVersion"
+
+    testImplementation "org.testcontainers:testcontainers:1.17.1"
+    testImplementation "org.testcontainers:junit-jupiter:1.17.1"
+
+}

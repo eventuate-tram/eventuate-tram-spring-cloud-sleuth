@@ -21,9 +21,10 @@ jobs:
             TERM=dumb ./gradlew  publishEventuateArtifacts
           when: on_success
       - run:
-          name: Save test results
+          name: Print container logs
           command: |
-            TERM=dumb ./.circleci/save-containers-and-tests.sh
+            export TERM=dumb
+            ./.circleci/print-container-logs.sh
           when: always
       - store_test_results:
           path: ~/junit

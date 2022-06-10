@@ -1,3 +1,5 @@
+rootProject.name="eventuate-tram-spring-cloud-sleuth"
+
 include 'eventuate-tram-spring-cloud-sleuth-tram-common'
 include 'eventuate-tram-spring-cloud-sleuth-tram-producer'
 include 'eventuate-tram-spring-cloud-sleuth-tram-consumer'

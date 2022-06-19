@@ -1,4 +1,6 @@
 dependencies {
     implementation project(":eventuate-tram-spring-cloud-sleuth-tram-producer")
     implementation project(":eventuate-tram-spring-cloud-sleuth-tram-consumer")
+    implementation project(":eventuate-tram-spring-cloud-sleuth-tram-reactive-producer")
+    implementation project(":eventuate-tram-spring-cloud-sleuth-tram-reactive-consumer")
 }

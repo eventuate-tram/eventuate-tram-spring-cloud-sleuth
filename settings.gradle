@@ -5,4 +5,10 @@ include 'eventuate-tram-spring-cloud-sleuth-tram-producer'
 include 'eventuate-tram-spring-cloud-sleuth-tram-consumer'
 include 'eventuate-tram-spring-cloud-sleuth-tram-starter'
 include 'eventuate-tram-spring-cloud-sleuth-tram-tests'
+include 'eventuate-tram-spring-cloud-sleuth-tram-reactive-tests'
+
+include 'eventuate-tram-spring-cloud-sleuth-tram-reactive-common'
+include 'eventuate-tram-spring-cloud-sleuth-tram-reactive-consumer'
+include 'eventuate-tram-spring-cloud-sleuth-tram-reactive-producer'
+
 include 'eventuate-tram-spring-cloud-sleuth-bom'

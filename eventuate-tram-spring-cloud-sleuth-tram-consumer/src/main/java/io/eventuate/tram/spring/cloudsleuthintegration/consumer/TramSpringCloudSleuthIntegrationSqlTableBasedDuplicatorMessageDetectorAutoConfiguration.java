@@ -1,9 +1,12 @@
 package io.eventuate.tram.spring.cloudsleuthintegration.consumer;
 
+import io.eventuate.tram.consumer.jdbc.SqlTableBasedDuplicateMessageDetector;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
+@ConditionalOnClass(SqlTableBasedDuplicateMessageDetector.class)
 @Import(TramSpringCloudSleuthIntegrationSqlTableBasedDuplicatorMessageDetectorConfiguration.class)
 public class TramSpringCloudSleuthIntegrationSqlTableBasedDuplicatorMessageDetectorAutoConfiguration {
 

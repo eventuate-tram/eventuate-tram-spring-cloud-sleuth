@@ -1,12 +1,13 @@
-= Eventuate Tram - Spring Cloud Sleuth Integration
-
-This repository defines modules that enable Spring Cloud Sleuth to capture Eventuate Tram message flows.
-
-image::./Zipkin_example.png[]
 = An Eventuate project
 
 image::https://eventuate.io/i/logo.gif[]
 
 This project is part of http://eventuate.io[Eventuate], which is a microservices collaboration platform.
+
+= Eventuate Tram - Spring Cloud Sleuth Integration
+
+This repository defines modules that enable Spring Cloud Sleuth to capture Eventuate Tram message flows.
+
+image::./Zipkin_example.png[]
 
 

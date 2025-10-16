@@ -19,6 +19,7 @@ dependencies {
     testImplementation "org.testcontainers:junit-jupiter:$testContainersVersion"
 
     testRuntimeOnly group: 'io.netty', name: 'netty-resolver-dns-native-macos', version: '4.1.75.Final', classifier: 'osx-aarch_64'
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher:1.14.0"
 
 }
 

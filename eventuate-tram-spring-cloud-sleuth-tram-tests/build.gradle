@@ -4,6 +4,7 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-sleuth-zipkin'
 
     testImplementation "org.springframework.cloud:spring-cloud-starter-sleuth"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher:1.14.0"
     testImplementation "org.springframework.boot:spring-boot-starter-web"
     testImplementation "org.springframework.boot:spring-boot-starter-test"
 

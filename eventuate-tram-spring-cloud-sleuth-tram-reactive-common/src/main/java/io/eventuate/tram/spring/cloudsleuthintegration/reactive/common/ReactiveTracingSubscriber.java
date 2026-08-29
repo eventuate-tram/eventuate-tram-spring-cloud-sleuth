@@ -33,8 +33,8 @@ public class ReactiveTracingSubscriber<T> implements CoreSubscriber<T>  {
     }
 
     @Override
-    public void onNext(T aVoid) {
-        // IGNORE
+    public void onNext(T value) {
+        this.actual.onNext(value);
     }
 
     @Override

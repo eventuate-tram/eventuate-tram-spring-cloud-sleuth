@@ -26,6 +26,10 @@ allprojects {
         }
     }
 
+    tasks.withType(JavaCompile).configureEach {
+        options.compilerArgs << "-parameters"
+    }
+
     repositories {
         mavenCentral()
         maven { url "https://repo.spring.io/milestone" }
@@ -37,6 +41,7 @@ allprojects {
 
       dependencies {
           implementation(platform("io.eventuate.tram.core:eventuate-tram-bom:$eventuateTramVersion"))
+          implementation(platform("com.fasterxml.jackson:jackson-bom:$jackson2Version"))
       }
 
       test {
@@ -53,12 +58,12 @@ gradle.projectsEvaluated {
         description = 'Aggregated Javadoc API documentation of all subprojects.'
         group = JavaBasePlugin.DOCUMENTATION_GROUP
 
-        destinationDir file("$buildDir/docs/javadoc")
+        destinationDir file("$buildDir/docs/aggregateJavadoc")
     }
 
     task("aggregateJavaDocsJar", type: org.gradle.api.tasks.bundling.Jar, dependsOn: project.aggregateJavaDocs) {
         archiveClassifier = 'javadoc'
-        from 'build/docs/javadoc'
+        from project.aggregateJavaDocs.destinationDir
     }
 
     artifacts {

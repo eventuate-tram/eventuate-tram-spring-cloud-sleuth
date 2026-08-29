@@ -9,6 +9,7 @@ dependencies {
 
     testImplementation "org.springframework.boot:spring-boot-starter-actuator:$springBootVersion"
     testImplementation "org.springframework.boot:spring-boot-starter-webflux:$springBootVersion"
+    testImplementation "org.springframework.boot:spring-boot-starter-webclient:$springBootVersion"
     testImplementation "org.springframework.boot:spring-boot-starter-restclient:$springBootVersion"
     testImplementation "org.springframework.boot:spring-boot-starter-webflux-test:$springBootVersion"
     testImplementation "org.springframework.boot:spring-boot-starter-data-r2dbc-test:$springBootVersion"

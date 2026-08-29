@@ -1,11 +1,20 @@
 dependencies {
     implementation project(":eventuate-tram-spring-cloud-sleuth-tram-reactive-producer")
     implementation project(":eventuate-tram-spring-cloud-sleuth-tram-reactive-consumer")
-    implementation 'org.springframework.cloud:spring-cloud-sleuth-zipkin'
 
-    testImplementation "org.springframework.cloud:spring-cloud-starter-sleuth"
-    testImplementation "org.springframework.boot:spring-boot-starter-webflux"
-    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation "org.springframework.boot:spring-boot-starter-zipkin:$springBootVersion"
+    testImplementation "org.springframework.boot:spring-boot-micrometer-tracing-brave:$springBootVersion"
+    testImplementation "io.micrometer:micrometer-tracing-bridge-brave:$micrometerTracingVersion"
+    testImplementation "io.zipkin.reporter2:zipkin-reporter-brave:$zipkinReporterVersion"
+
+    testImplementation "org.springframework.boot:spring-boot-starter-actuator:$springBootVersion"
+    testImplementation "org.springframework.boot:spring-boot-starter-webflux:$springBootVersion"
+    testImplementation "org.springframework.boot:spring-boot-starter-restclient:$springBootVersion"
+    testImplementation "org.springframework.boot:spring-boot-starter-webflux-test:$springBootVersion"
+    testImplementation "org.springframework.boot:spring-boot-starter-data-r2dbc-test:$springBootVersion"
+    testImplementation "org.springframework.boot:spring-boot-starter-jdbc-test:$springBootVersion"
+
+    testImplementation "org.apache.commons:commons-lang3:$commonsLang3Version"
 
     testImplementation "io.eventuate.tram.core:eventuate-tram-spring-reactive-events-publisher"
     testImplementation "io.eventuate.tram.core:eventuate-tram-spring-reactive-events-subscriber"
@@ -16,10 +25,10 @@ dependencies {
     testImplementation "io.eventuate.util:eventuate-util-test:$eventuateUtilVersion"
 
     testImplementation "org.testcontainers:testcontainers:$testContainersVersion"
-    testImplementation "org.testcontainers:junit-jupiter:$testContainersVersion"
+    testImplementation "org.testcontainers:testcontainers-junit-jupiter:$testContainersVersion"
 
-    testRuntimeOnly group: 'io.netty', name: 'netty-resolver-dns-native-macos', version: '4.1.75.Final', classifier: 'osx-aarch_64'
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher:1.14.0"
+    testRuntimeOnly group: 'io.netty', name: 'netty-resolver-dns-native-macos', version: nettyVersion, classifier: 'osx-aarch_64'
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher:$junitPlatformLauncherVersion"
 
 }
 

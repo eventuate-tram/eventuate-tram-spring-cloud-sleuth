@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @SpringBootTest(classes= SpringCloudSleuthWhenDisabledIntegrationTest.TestConfiguration.class, webEnvironment = SpringBootTest
-        .WebEnvironment.NONE, properties = "spring.sleuth.enabled=false")
+        .WebEnvironment.NONE, properties = "management.tracing.enabled=false")
 public class SpringCloudSleuthWhenDisabledIntegrationTest {
 
 

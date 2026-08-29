@@ -2,7 +2,6 @@ package io.eventuate.tram.spring.cloudsleuthintegration.test;
 
 import io.eventuate.tram.spring.inmemory.TramInMemoryConfiguration;
 import io.eventuate.util.test.async.Eventually;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -10,8 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -43,12 +43,12 @@ public class SpringCloudSleuthIntegrationTest {
   static class TestConfiguration {
 
       @Bean
-      public RestTemplate restTemplate() {
-        return new RestTemplate();
+      public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
+        return restTemplateBuilder.build();
       }
   }
 
-  @Value("${spring.zipkin.baseUrl}")
+  @Value("${test.zipkin.baseUrl}")
   private String zipkinBaseUrl;
 
   @LocalServerPort
@@ -58,12 +58,14 @@ public class SpringCloudSleuthIntegrationTest {
   private RestTemplate restTemplate;
 
   @Container
-  static private final GenericContainer<?> zipkin = new GenericContainer<>(DockerImageName.parse("openzipkin/zipkin:2.23"))
+  static private final GenericContainer<?> zipkin = new GenericContainer<>(DockerImageName.parse("openzipkin/zipkin:3"))
           .withExposedPorts(9411);
 
   @DynamicPropertySource
   static void zipkinProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.zipkin.baseUrl", () -> String.format("http://%s:%s/", zipkin.getHost(), zipkin.getFirstMappedPort()));
+    registry.add("test.zipkin.baseUrl", () -> String.format("http://%s:%s/", zipkin.getHost(), zipkin.getFirstMappedPort()));
+    registry.add("management.zipkin.tracing.endpoint",
+            () -> String.format("http://%s:%s/api/v2/spans", zipkin.getHost(), zipkin.getFirstMappedPort()));
   }
 
   @Test
@@ -74,16 +76,16 @@ public class SpringCloudSleuthIntegrationTest {
             new TestMessage(port), String.class);
     Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
 
-    Eventually.eventually(() -> assertTracesSendToZipkin(id));
+    String traceId = result.getBody();
+
+    Eventually.eventually(() -> assertTracesSendToZipkin(traceId));
   }
 
-  private void assertTracesSendToZipkin(String id)  {
+  private void assertTracesSendToZipkin(String traceId)  {
 
-    String url = String.format
-            ("%sapi/v2/traces?annotationQuery=http.path=/foo/%s",
-                    zipkinBaseUrl, id);
+    String url = String.format("%sapi/v2/trace/%s", zipkinBaseUrl, traceId);
 
-    logger.debug("Retrieving traces {}", url);
+    logger.debug("Retrieving trace {}", url);
 
     ResponseEntity<String> result = restTemplate.getForEntity(url, String.class);
 
@@ -91,14 +93,12 @@ public class SpringCloudSleuthIntegrationTest {
 
     String jsonString = result.getBody();
 
-    List<List<ZipkinSpan>> traces = OpenZipkinTraceDeserializer.deserializeTraces(jsonString);
-    assertEquals(1, traces.size());
+    List<ZipkinSpan> trace = OpenZipkinTraceDeserializer.deserializeTrace(jsonString);
 
-    List<ZipkinSpan> trace = traces.get(0);
-    ZipkinSpan parentSpan = findRequiredSpanByHttpPathTag(trace, "/foo/" + id);
+    ZipkinSpan parentSpan = findRequiredServerSpanByUriTag(trace, TestController.FOO_URI_TEMPLATE);
     ZipkinSpan sendSpan = findRequiredSpanByName(trace, "dosend testchannel");
     ZipkinSpan receiveSpan = findRequiredSpanByName(trace, "receive testchannel");
-    ZipkinSpan barPostSpan = findRequiredSpanByHttpPathTag(trace, "/bar");
+    ZipkinSpan barPostSpan = findRequiredClientSpanByUriTag(trace, TestController.barUrl(port));
 
     assertChildOf(parentSpan, sendSpan);
     assertChildOf(sendSpan, receiveSpan);
@@ -106,14 +106,16 @@ public class SpringCloudSleuthIntegrationTest {
 
   }
 
-  @NotNull
   private ZipkinSpan findRequiredSpanByName(List<ZipkinSpan> trace, String name) {
     return findRequiredSpan(trace, s -> s.hasName(name));
   }
 
-  @NotNull
-  private ZipkinSpan findRequiredSpanByHttpPathTag(List<ZipkinSpan> trace, String path) {
-    return findRequiredSpan(trace, s -> s.hasTag("http.path", path));
+  private ZipkinSpan findRequiredServerSpanByUriTag(List<ZipkinSpan> trace, String uri) {
+    return findRequiredSpan(trace, s -> s.isServer() && s.hasTag("uri", uri));
+  }
+
+  private ZipkinSpan findRequiredClientSpanByUriTag(List<ZipkinSpan> trace, String uri) {
+    return findRequiredSpan(trace, s -> s.isClient() && s.hasTag("uri", uri));
   }
 
   private void assertChildOf(ZipkinSpan parent, ZipkinSpan span) {
@@ -123,7 +125,6 @@ public class SpringCloudSleuthIntegrationTest {
     }
   }
 
-  @NotNull
   private ZipkinSpan findRequiredSpan(List<ZipkinSpan> trace, Predicate<ZipkinSpan> predicate) {
     return trace.stream().filter(predicate).findFirst().orElseThrow(() -> new RuntimeException("Span not found"));
   }

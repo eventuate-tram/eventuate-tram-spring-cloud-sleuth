@@ -1,6 +1,6 @@
 package io.eventuate.tram.spring.cloudsleuthintegration;
 
-import org.springframework.cloud.sleuth.propagation.Propagator;
+import io.micrometer.tracing.propagation.Propagator;
 
 import java.util.List;
 

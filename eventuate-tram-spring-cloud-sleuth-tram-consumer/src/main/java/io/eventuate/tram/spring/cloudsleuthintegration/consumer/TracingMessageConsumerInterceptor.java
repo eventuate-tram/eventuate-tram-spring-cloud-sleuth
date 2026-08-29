@@ -7,9 +7,9 @@ import io.eventuate.tram.messaging.common.SubscriberIdAndMessage;
 import io.eventuate.tram.spring.cloudsleuthintegration.MessageHeaderAccessor;
 import io.eventuate.tram.spring.cloudsleuthintegration.MessageHeaderPropagation;
 import io.eventuate.tram.spring.cloudsleuthintegration.SpanHelper;
+import io.micrometer.tracing.Span;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.sleuth.Span;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +26,7 @@ public class TracingMessageConsumerInterceptor implements MessageHandlerDecorato
 
   private void addMessageTags(Span span, Message message) {
     Map<String, String> copy = new HashMap<>(message.getHeaders());
-    MessageHeaderPropagation.removeAnyTraceHeaders(new SpanHelper.MessageHeaderMapAccessor(copy), this.spanHelper.tracing.propagation().keys());
+    MessageHeaderPropagation.removeAnyTraceHeaders(new SpanHelper.MessageHeaderMapAccessor(copy), spanHelper.propagator.fields());
     copy.forEach((key, value) -> span.tag("message." + key, value));
   }
 

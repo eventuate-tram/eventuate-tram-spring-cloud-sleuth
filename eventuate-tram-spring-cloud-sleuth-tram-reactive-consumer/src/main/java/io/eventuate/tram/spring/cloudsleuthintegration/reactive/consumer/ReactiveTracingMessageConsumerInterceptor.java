@@ -3,13 +3,13 @@ package io.eventuate.tram.spring.cloudsleuthintegration.reactive.consumer;
 import io.eventuate.tram.consumer.common.reactive.ReactiveMessageHandlerDecorator;
 import io.eventuate.tram.consumer.common.reactive.ReactiveMessageHandlerDecoratorChain;
 import io.eventuate.tram.messaging.common.SubscriberIdAndMessage;
+import io.micrometer.tracing.CurrentTraceContext;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.propagation.Propagator;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.sleuth.CurrentTraceContext;
-import org.springframework.cloud.sleuth.Tracer;
-import org.springframework.cloud.sleuth.propagation.Propagator;
 import org.springframework.context.ApplicationContext;
 import reactor.core.publisher.Mono;
 

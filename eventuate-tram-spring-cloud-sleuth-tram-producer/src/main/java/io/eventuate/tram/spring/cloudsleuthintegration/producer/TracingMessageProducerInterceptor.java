@@ -5,6 +5,7 @@ import io.eventuate.tram.messaging.common.MessageInterceptor;
 import io.eventuate.tram.spring.cloudsleuthintegration.MessageHeaderAccessor;
 import io.eventuate.tram.spring.cloudsleuthintegration.MessageHeaderPropagation;
 import io.eventuate.tram.spring.cloudsleuthintegration.SpanHelper;
+import io.micrometer.tracing.Span;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,18 +26,18 @@ public class TracingMessageProducerInterceptor implements MessageInterceptor {
   public void preSend(Message message) {
     logger.debug("preSend {}", message.getHeaders());
     MessageHeaderAccessor headers = spanHelper.makeMessageHeaderAccessor(message);
-    org.springframework.cloud.sleuth.Span span = spanHelper.nextSpan(spann -> {
+    Span span = spanHelper.nextSpan(spann -> {
       spann.name("doSend " + message.getRequiredHeader(Message.DESTINATION));
       spann.tag("message.operation", "PRODUCE");
       addMessageTags(spann, message);
     });
-    MessageHeaderPropagation.removeAnyTraceHeaders(headers, this.spanHelper.tracing.propagation().keys());
+    MessageHeaderPropagation.removeAnyTraceHeaders(headers, spanHelper.propagator.fields());
     spanHelper.propagator.inject(span.context(), headers, spanHelper.setter);
   }
 
-  private void addMessageTags(org.springframework.cloud.sleuth.Span span, Message message) {
+  private void addMessageTags(Span span, Message message) {
     Map<String, String> copy = new HashMap<>(message.getHeaders());
-    MessageHeaderPropagation.removeAnyTraceHeaders(new SpanHelper.MessageHeaderMapAccessor(copy), this.spanHelper.tracing.propagation().keys());
+    MessageHeaderPropagation.removeAnyTraceHeaders(new SpanHelper.MessageHeaderMapAccessor(copy), spanHelper.propagator.fields());
     copy.forEach((key, value) -> span.tag("message." + key, value));
   }
 

@@ -1,21 +1,23 @@
 package io.eventuate.tram.spring.cloudsleuthintegration.test;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
-import java.io.IOException;
 import java.util.List;
 
 public class OpenZipkinTraceDeserializer {
-  static List<List<ZipkinSpan>> deserializeTraces(String jsonString) {
-    try {
-      ObjectMapper objectMapper = new ObjectMapper();
-      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-      return objectMapper.readValue(jsonString, new TypeReference<List<List<ZipkinSpan>>>() { });
 
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+  private static final ObjectMapper objectMapper = JsonMapper.builder()
+          .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+          .build();
+
+  static List<List<ZipkinSpan>> deserializeTraces(String jsonString) {
+    return objectMapper.readValue(jsonString, new TypeReference<List<List<ZipkinSpan>>>() { });
+  }
+
+  static List<ZipkinSpan> deserializeTrace(String jsonString) {
+    return objectMapper.readValue(jsonString, new TypeReference<List<ZipkinSpan>>() { });
   }
 }

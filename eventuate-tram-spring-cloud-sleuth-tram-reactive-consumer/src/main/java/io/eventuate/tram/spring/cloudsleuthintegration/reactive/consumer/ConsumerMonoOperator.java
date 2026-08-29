@@ -3,12 +3,12 @@ package io.eventuate.tram.spring.cloudsleuthintegration.reactive.consumer;
 import io.eventuate.tram.messaging.common.Message;
 import io.eventuate.tram.messaging.common.SubscriberIdAndMessage;
 import io.eventuate.tram.spring.cloudsleuthintegration.reactive.common.AbstractTracingMonoOperator;
+import io.micrometer.tracing.CurrentTraceContext;
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.propagation.Propagator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.sleuth.CurrentTraceContext;
-import org.springframework.cloud.sleuth.Span;
-import org.springframework.cloud.sleuth.Tracer;
-import org.springframework.cloud.sleuth.propagation.Propagator;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
@@ -42,7 +42,6 @@ public class ConsumerMonoOperator extends AbstractTracingMonoOperator<Object> {
     @Override
     protected void onNewSpan(Span span) {
     }
-
 
 
 

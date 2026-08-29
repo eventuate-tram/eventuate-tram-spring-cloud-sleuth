@@ -1,7 +1,9 @@
 dependencies {
     implementation project(":eventuate-tram-spring-cloud-sleuth-tram-common")
 
-    implementation 'org.springframework.cloud:spring-cloud-starter-sleuth'
+    implementation "io.micrometer:micrometer-tracing:$micrometerTracingVersion"
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    implementation "org.springframework.boot:spring-boot-autoconfigure:$springBootVersion"
 
     compileOnly "io.eventuate.tram.core:eventuate-tram-messaging-producer-common"
 

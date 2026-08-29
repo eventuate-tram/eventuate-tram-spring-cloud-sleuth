@@ -1,6 +1,9 @@
 package io.eventuate.tram.spring.cloudsleuthintegration.reactive.producer;
 
 import io.eventuate.tram.messaging.common.Message;
+import io.micrometer.tracing.CurrentTraceContext;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.propagation.Propagator;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -8,9 +11,6 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.cloud.sleuth.CurrentTraceContext;
-import org.springframework.cloud.sleuth.Tracer;
-import org.springframework.cloud.sleuth.propagation.Propagator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import reactor.core.publisher.Mono;

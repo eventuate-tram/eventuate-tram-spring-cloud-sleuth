@@ -1,17 +1,25 @@
 dependencies {
     implementation project(":eventuate-tram-spring-cloud-sleuth-tram-producer")
     implementation project(":eventuate-tram-spring-cloud-sleuth-tram-consumer")
-    implementation 'org.springframework.cloud:spring-cloud-sleuth-zipkin'
 
-    testImplementation "org.springframework.cloud:spring-cloud-starter-sleuth"
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher:1.14.0"
-    testImplementation "org.springframework.boot:spring-boot-starter-web"
-    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation "org.springframework.boot:spring-boot-starter-zipkin:$springBootVersion"
+    testImplementation "org.springframework.boot:spring-boot-micrometer-tracing-brave:$springBootVersion"
+    testImplementation "io.micrometer:micrometer-tracing-bridge-brave:$micrometerTracingVersion"
+    testImplementation "io.zipkin.reporter2:zipkin-reporter-brave:$zipkinReporterVersion"
+
+    testImplementation "org.springframework.boot:spring-boot-starter-actuator:$springBootVersion"
+    testImplementation "org.springframework.boot:spring-boot-starter-webmvc:$springBootVersion"
+    testImplementation "org.springframework.boot:spring-boot-starter-restclient:$springBootVersion"
+    testImplementation "org.springframework.boot:spring-boot-starter-webmvc-test:$springBootVersion"
+
+    testImplementation "org.apache.commons:commons-lang3:$commonsLang3Version"
+
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher:$junitPlatformLauncherVersion"
 
     testImplementation "io.eventuate.tram.core:eventuate-tram-spring-in-memory"
     testImplementation "io.eventuate.util:eventuate-util-test:$eventuateUtilVersion"
 
     testImplementation "org.testcontainers:testcontainers:$testContainersVersion"
-    testImplementation "org.testcontainers:junit-jupiter:$testContainersVersion"
+    testImplementation "org.testcontainers:testcontainers-junit-jupiter:$testContainersVersion"
 
 }

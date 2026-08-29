@@ -1,6 +1,6 @@
 package io.eventuate.tram.spring.cloudsleuthintegration.test;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Map;
 
@@ -10,6 +10,7 @@ public class ZipkinSpan {
   private String traceId;
   private String parentId;
   private String name;
+  private String kind;
   private Map<String, String> tags;
 
   @Override
@@ -49,6 +50,14 @@ public class ZipkinSpan {
     this.name = name;
   }
 
+  public String getKind() {
+    return kind;
+  }
+
+  public void setKind(String kind) {
+    this.kind = kind;
+  }
+
   public Map<String, String> getTags() {
     return tags;
   }
@@ -58,11 +67,19 @@ public class ZipkinSpan {
   }
 
   public boolean hasTag(String tag, String value) {
-    return value.equals(tags.get(tag));
+    return tags != null && value.equals(tags.get(tag));
   }
 
   public boolean hasName(String name) {
     return name.equals(this.name);
+  }
+
+  public boolean isServer() {
+    return "SERVER".equals(kind);
+  }
+
+  public boolean isClient() {
+    return "CLIENT".equals(kind);
   }
 
   boolean isChild(ZipkinSpan span) {

@@ -1,3 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-io.eventuate.tram.spring.cloudsleuthintegration.consumer.TramSpringCloudSleuthIntegrationConsumerAutoConfiguration, \
-io.eventuate.tram.spring.cloudsleuthintegration.consumer.TramSpringCloudSleuthIntegrationSqlTableBasedDuplicatorMessageDetectorAutoConfiguration

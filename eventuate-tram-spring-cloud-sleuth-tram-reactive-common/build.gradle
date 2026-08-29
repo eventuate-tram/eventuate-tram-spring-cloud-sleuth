@@ -1,4 +1,5 @@
 dependencies {
-    compileOnly "org.springframework.cloud:spring-cloud-starter-sleuth"
-    compileOnly "io.projectreactor:reactor-core"
+    compileOnly "io.micrometer:micrometer-tracing:$micrometerTracingVersion"
+    compileOnly "io.projectreactor:reactor-core:$reactorVersion"
+    compileOnly "org.slf4j:slf4j-api:$slf4jVersion"
 }

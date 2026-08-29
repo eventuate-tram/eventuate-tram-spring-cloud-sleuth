@@ -7,7 +7,6 @@ import io.eventuate.tram.spring.reactive.consumer.kafka.EventuateTramReactiveKaf
 import io.eventuate.tram.spring.reactive.events.subscriber.ReactiveTramEventSubscriberConfiguration;
 import io.eventuate.util.test.async.Eventually;
 import io.netty.resolver.DefaultAddressResolverGroup;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -15,8 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.testcontainers.containers.DockerComposeContainer;
+import org.testcontainers.containers.ComposeContainer;
 import org.testcontainers.containers.wait.strategy.DockerHealthcheckWaitStrategy;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -35,8 +35,6 @@ import reactor.netty.http.client.HttpClient;
 import java.io.File;
 import java.util.List;
 import java.util.function.Predicate;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(classes= SpringCloudSleuthReactiveIntegrationTest.TestConfiguration.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -58,22 +56,19 @@ public class SpringCloudSleuthReactiveIntegrationTest {
   static class TestConfiguration {
 
       @Bean
-      public WebClient webClient() {
+      public WebClient webClient(WebClient.Builder webClientBuilder) {
         HttpClient httpClient = HttpClient.create().resolver(DefaultAddressResolverGroup.INSTANCE);
 
-        WebClient webClient = WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient))
-                .build();
-
-        return webClient;
+        return webClientBuilder.clientConnector(new ReactorClientHttpConnector(httpClient)).build();
       }
 
       @Bean
-      public RestTemplate restTemplate() {
-        return new RestTemplate();
+      public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
+        return restTemplateBuilder.build();
       }
   }
 
-  @Value("${spring.zipkin.baseUrl}")
+  @Value("${test.zipkin.baseUrl}")
   private String zipkinBaseUrl;
 
   @LocalServerPort
@@ -83,14 +78,14 @@ public class SpringCloudSleuthReactiveIntegrationTest {
   private RestTemplate restTemplate;
 
   @Container
-  static private final DockerComposeContainer<?> zipkin = new DockerComposeContainer<>(new File("../docker-compose.yml"))
+  static private final ComposeContainer zipkin = new ComposeContainer(new File("../docker-compose.yml"))
   .withEnv("EVENTUATE_COMMON_VERSION", System.getProperty("eventuateCommonImageVersion"))
   .withEnv("EVENTUATE_MESSAGING_KAFKA_IMAGE_VERSION", System.getProperty("eventuateMessagingKafkaImageVersion"))
   .withEnv("EVENTUATE_CDC_VERSION", System.getProperty("eventuateCdcImageVersion"))
   .withEnv("EVENTUATE_CDC_KAFKA_ENABLE_BATCH_PROCESSING", System.getProperty("eventuateCdcKafkaEnableBatchProcessing"))
-  .withExposedService("mysql_1", 3306, new DockerHealthcheckWaitStrategy())
-  .withExposedService("kafka", 9092)
-  .withExposedService("zookeeper_1", 2181)
+  .withExposedService("mysql-1", 3306, new DockerHealthcheckWaitStrategy())
+  .withExposedService("kafka-1", 9092)
+  .withExposedService("zookeeper-1", 2181)
   ;
 
 
@@ -102,16 +97,16 @@ public class SpringCloudSleuthReactiveIntegrationTest {
             new TestMessage(port), String.class);
     Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
 
-    Eventually.eventually(() -> assertTracesSendToZipkin(id));
+    String traceId = result.getBody();
+
+    Eventually.eventually(() -> assertTracesSendToZipkin(traceId));
   }
 
-  private void assertTracesSendToZipkin(String id)  {
+  private void assertTracesSendToZipkin(String traceId)  {
 
-    String url = String.format
-            ("%sapi/v2/traces?annotationQuery=http.path=/foo/%s",
-                    zipkinBaseUrl, id);
+    String url = String.format("%sapi/v2/trace/%s", zipkinBaseUrl, traceId);
 
-    logger.debug("Retrieving traces {}", url);
+    logger.debug("Retrieving trace {}", url);
 
     ResponseEntity<String> result = restTemplate.getForEntity(url, String.class);
 
@@ -121,14 +116,12 @@ public class SpringCloudSleuthReactiveIntegrationTest {
 
 
     logger.info("jsonString={}", jsonString);
-    List<List<ZipkinSpan>> traces = OpenZipkinTraceDeserializer.deserializeTraces(jsonString);
-    assertEquals(1, traces.size());
+    List<ZipkinSpan> trace = OpenZipkinTraceDeserializer.deserializeTrace(jsonString);
 
-    List<ZipkinSpan> trace = traces.get(0);
-    ZipkinSpan parentSpan = findRequiredSpanByHttpPathTag(trace, "/foo/" + id);
+    ZipkinSpan parentSpan = findRequiredServerSpanByUriTag(trace, TestController.FOO_URI_TEMPLATE);
     ZipkinSpan sendSpan = findRequiredSpanByName(trace, "dosend testchannel");
     ZipkinSpan receiveSpan = findRequiredSpanByName(trace, "receive testchannel");
-    ZipkinSpan barPostSpan = findRequiredSpanByHttpPathTag(trace, "/bar");
+    ZipkinSpan barPostSpan = findRequiredClientSpanByUriTag(trace, TestController.barUrl(port));
 
     assertChildOf(parentSpan, sendSpan);
     assertChildOf(sendSpan, receiveSpan);
@@ -136,14 +129,16 @@ public class SpringCloudSleuthReactiveIntegrationTest {
 
   }
 
-  @NotNull
   private ZipkinSpan findRequiredSpanByName(List<ZipkinSpan> trace, String name) {
     return findRequiredSpan(trace, s -> s.hasName(name));
   }
 
-  @NotNull
-  private ZipkinSpan findRequiredSpanByHttpPathTag(List<ZipkinSpan> trace, String path) {
-    return findRequiredSpan(trace, s -> s.hasTag("http.path", path));
+  private ZipkinSpan findRequiredServerSpanByUriTag(List<ZipkinSpan> trace, String uri) {
+    return findRequiredSpan(trace, s -> s.isServer() && s.hasTag("uri", uri));
+  }
+
+  private ZipkinSpan findRequiredClientSpanByUriTag(List<ZipkinSpan> trace, String uri) {
+    return findRequiredSpan(trace, s -> s.isClient() && s.hasTag("uri", uri));
   }
 
   private void assertChildOf(ZipkinSpan parent, ZipkinSpan span) {
@@ -153,7 +148,6 @@ public class SpringCloudSleuthReactiveIntegrationTest {
     }
   }
 
-  @NotNull
   private ZipkinSpan findRequiredSpan(List<ZipkinSpan> trace, Predicate<ZipkinSpan> predicate) {
     return trace.stream().filter(predicate).findFirst().orElseThrow(() -> new RuntimeException("Span not found"));
   }

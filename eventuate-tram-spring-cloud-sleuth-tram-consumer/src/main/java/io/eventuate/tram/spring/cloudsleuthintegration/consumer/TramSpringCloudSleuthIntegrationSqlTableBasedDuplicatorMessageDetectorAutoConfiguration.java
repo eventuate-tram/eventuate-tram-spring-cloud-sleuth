@@ -1,18 +1,16 @@
 package io.eventuate.tram.spring.cloudsleuthintegration.consumer;
 
 import io.eventuate.tram.consumer.jdbc.SqlTableBasedDuplicateMessageDetector;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import io.micrometer.tracing.Tracer;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.cloud.sleuth.autoconfig.brave.BraveAutoConfiguration;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-@Configuration
-@ConditionalOnClass(SqlTableBasedDuplicateMessageDetector.class)
+@AutoConfiguration(afterName = "org.springframework.boot.micrometer.tracing.brave.autoconfigure.BraveAutoConfiguration")
+@ConditionalOnClass({SqlTableBasedDuplicateMessageDetector.class, Tracer.class})
 @Import(TramSpringCloudSleuthIntegrationSqlTableBasedDuplicatorMessageDetectorConfiguration.class)
-@AutoConfigureAfter(BraveAutoConfiguration.class)
-@ConditionalOnProperty(value = "spring.sleuth.enabled", matchIfMissing = true)
+@ConditionalOnProperty(value = "management.tracing.enabled", matchIfMissing = true)
 public class TramSpringCloudSleuthIntegrationSqlTableBasedDuplicatorMessageDetectorAutoConfiguration {
 
 }

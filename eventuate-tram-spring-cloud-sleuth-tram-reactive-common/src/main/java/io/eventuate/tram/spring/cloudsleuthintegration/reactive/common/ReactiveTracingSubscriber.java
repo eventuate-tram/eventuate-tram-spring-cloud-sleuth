@@ -1,10 +1,10 @@
 package io.eventuate.tram.spring.cloudsleuthintegration.reactive.common;
 
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.contextpropagation.ObservationAwareSpanThreadLocalAccessor;
 import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.sleuth.Span;
-import org.springframework.cloud.sleuth.TraceContext;
 import reactor.core.CoreSubscriber;
 import reactor.util.annotation.Nullable;
 import reactor.util.context.Context;
@@ -24,7 +24,7 @@ public class ReactiveTracingSubscriber<T> implements CoreSubscriber<T>  {
     ReactiveTracingSubscriber(CoreSubscriber<? super T> actual, Context context, Span span) {
         this.actual = actual;
         this.span = span;
-        this.context = context.put(TraceContext.class, span.context());
+        this.context = context.put(ObservationAwareSpanThreadLocalAccessor.KEY, span);
     }
 
     @Override
@@ -63,4 +63,3 @@ public class ReactiveTracingSubscriber<T> implements CoreSubscriber<T>  {
 
 
 }
-

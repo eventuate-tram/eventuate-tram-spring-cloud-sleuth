@@ -36,12 +36,7 @@ allprojects {
     if (!project.name.endsWith("-bom")) {
 
       dependencies {
-          implementation(platform("org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"))
-          implementation(platform("org.springframework.boot:spring-boot-dependencies:$springBootVersion"))
           implementation(platform("io.eventuate.tram.core:eventuate-tram-bom:$eventuateTramVersion"))
-
-          testImplementation "org.springframework.boot:spring-boot-starter-test"
-
       }
 
       test {
@@ -62,7 +57,7 @@ gradle.projectsEvaluated {
     }
 
     task("aggregateJavaDocsJar", type: org.gradle.api.tasks.bundling.Jar, dependsOn: project.aggregateJavaDocs) {
-        classifier = 'javadoc'
+        archiveClassifier = 'javadoc'
         from 'build/docs/javadoc'
     }
 

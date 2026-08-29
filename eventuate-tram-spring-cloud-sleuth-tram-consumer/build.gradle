@@ -1,10 +1,12 @@
 dependencies {
-    implementation 'org.springframework.cloud:spring-cloud-starter-sleuth'
-
-    compileOnly "io.eventuate.tram.core:eventuate-tram-consumer-jdbc"
-
     implementation project(":eventuate-tram-spring-cloud-sleuth-tram-common")
 
+    implementation "io.micrometer:micrometer-tracing:$micrometerTracingVersion"
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    implementation "org.springframework.boot:spring-boot-autoconfigure:$springBootVersion"
+    implementation "org.aspectj:aspectjweaver:$aspectjVersion"
+
+    compileOnly "io.eventuate.tram.core:eventuate-tram-consumer-jdbc"
     compileOnly "io.eventuate.tram.core:eventuate-tram-consumer-common"
 
 }

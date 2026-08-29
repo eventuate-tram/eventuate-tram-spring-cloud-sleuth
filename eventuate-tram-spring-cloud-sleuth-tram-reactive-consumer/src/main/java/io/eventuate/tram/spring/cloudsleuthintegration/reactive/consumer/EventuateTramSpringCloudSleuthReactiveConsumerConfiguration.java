@@ -1,8 +1,8 @@
 package io.eventuate.tram.spring.cloudsleuthintegration.reactive.consumer;
 
-import org.springframework.cloud.sleuth.CurrentTraceContext;
-import org.springframework.cloud.sleuth.Tracer;
-import org.springframework.cloud.sleuth.propagation.Propagator;
+import io.micrometer.tracing.CurrentTraceContext;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.propagation.Propagator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

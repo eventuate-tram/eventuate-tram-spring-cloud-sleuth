@@ -1,5 +1,6 @@
 dependencies {
-    implementation 'org.springframework.cloud:spring-cloud-starter-sleuth'
+    api "io.micrometer:micrometer-tracing:$micrometerTracingVersion"
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    implementation "org.springframework.boot:spring-boot-autoconfigure:$springBootVersion"
     compileOnly "io.eventuate.tram.core:eventuate-tram-messaging"
 }
-

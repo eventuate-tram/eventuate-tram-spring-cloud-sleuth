@@ -3,6 +3,7 @@ package io.eventuate.tram.spring.cloudsleuthintegration.test;
 import io.eventuate.common.json.mapper.JSonMapper;
 import io.eventuate.tram.messaging.common.Message;
 import io.eventuate.tram.messaging.consumer.MessageConsumer;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Component
 public class TestConsumer {
@@ -36,8 +36,7 @@ public class TestConsumer {
     logger.debug("received message {}" , message);
     TestMessage testMessage = JSonMapper.fromJson(message.getPayload(), TestMessage.class);
 
-    ResponseEntity<String> result = restTemplate.postForEntity(String.format("http://localhost:%s/bar", testMessage
-                    .getPort()),
+    ResponseEntity<String> result = restTemplate.postForEntity(TestController.barUrl(testMessage.getPort()),
             "hello", String.class);
 
     assertEquals(HttpStatus.OK, result.getStatusCode());

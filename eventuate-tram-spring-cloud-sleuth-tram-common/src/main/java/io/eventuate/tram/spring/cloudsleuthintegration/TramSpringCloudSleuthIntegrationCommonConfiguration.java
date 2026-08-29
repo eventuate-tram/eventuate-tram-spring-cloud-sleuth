@@ -1,8 +1,7 @@
 package io.eventuate.tram.spring.cloudsleuthintegration;
 
-import brave.Tracing;
-import org.springframework.cloud.sleuth.Tracer;
-import org.springframework.cloud.sleuth.propagation.Propagator;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.propagation.Propagator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,8 +9,8 @@ import org.springframework.context.annotation.Configuration;
 public class TramSpringCloudSleuthIntegrationCommonConfiguration {
 
   @Bean
-  public SpanHelper spanHelper(Tracing tracing, Propagator propagator, Tracer tracer) {
-    return new SpanHelper(tracing, propagator, MessageHeaderPropagation.INSTANCE, MessageHeaderPropagation.INSTANCE, tracer);
+  public SpanHelper spanHelper(Propagator propagator, Tracer tracer) {
+    return new SpanHelper(propagator, MessageHeaderPropagation.INSTANCE, MessageHeaderPropagation.INSTANCE, tracer);
   }
 
 }

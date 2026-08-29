@@ -10,13 +10,10 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import reactor.core.publisher.Mono;
 
 @Aspect
-public class ReactiveMessageProducerImplementationAspect implements ApplicationContextAware {
+public class ReactiveMessageProducerImplementationAspect {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -24,8 +21,7 @@ public class ReactiveMessageProducerImplementationAspect implements ApplicationC
     final Tracer tracer;
 
 
-    private CurrentTraceContext currentTraceContext;
-    private ApplicationContext applicationContext;
+    private final CurrentTraceContext currentTraceContext;
 
     public final Propagator propagator;
 
@@ -39,18 +35,6 @@ public class ReactiveMessageProducerImplementationAspect implements ApplicationC
     private void doWithMessage() {
     }
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
-
-    CurrentTraceContext currentTraceContext() {
-        if (this.currentTraceContext == null) {
-            this.currentTraceContext = this.applicationContext.getBean(CurrentTraceContext.class);
-        }
-        return this.currentTraceContext;
-    }
-
     @Around("doWithMessage()")
     public Object aroundSend(ProceedingJoinPoint pjp) throws Throwable {
         Mono<Message> source = Mono.defer(() -> {
@@ -60,7 +44,7 @@ public class ReactiveMessageProducerImplementationAspect implements ApplicationC
                 return Mono.error(e);
             }
         });
-        return new ProducerMonoOperator(source, (Message)pjp.getArgs()[0], this.tracer, this.currentTraceContext(), this.propagator);
+        return new ProducerMonoOperator(source, (Message)pjp.getArgs()[0], this.tracer, this.currentTraceContext, this.propagator);
     }
 
 

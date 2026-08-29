@@ -41,7 +41,7 @@ allprojects {
 
       dependencies {
           implementation(platform("io.eventuate.tram.core:eventuate-tram-bom:$eventuateTramVersion"))
-          implementation(platform("com.fasterxml.jackson:jackson-bom:$jackson2Version"))
+          implementation(platform("tools.jackson:jackson-bom:$jacksonVersion"))
       }
 
       test {
@@ -58,7 +58,7 @@ gradle.projectsEvaluated {
         description = 'Aggregated Javadoc API documentation of all subprojects.'
         group = JavaBasePlugin.DOCUMENTATION_GROUP
 
-        destinationDir file("$buildDir/docs/aggregateJavadoc")
+        destinationDir layout.buildDirectory.dir("docs/aggregateJavadoc").get().asFile
     }
 
     task("aggregateJavaDocsJar", type: org.gradle.api.tasks.bundling.Jar, dependsOn: project.aggregateJavaDocs) {

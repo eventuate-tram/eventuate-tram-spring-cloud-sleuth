@@ -9,8 +9,6 @@ import io.micrometer.tracing.propagation.Propagator;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import reactor.core.publisher.Mono;
 
 public class ReactiveTracingMessageConsumerInterceptor implements ReactiveMessageHandlerDecorator {
@@ -21,13 +19,9 @@ public class ReactiveTracingMessageConsumerInterceptor implements ReactiveMessag
   final Tracer tracer;
 
 
-  private CurrentTraceContext currentTraceContext;
+  private final CurrentTraceContext currentTraceContext;
 
   public final Propagator propagator;
-
-  @Autowired
-  private ApplicationContext applicationContext;
-
 
   public ReactiveTracingMessageConsumerInterceptor(Tracer tracer, CurrentTraceContext currentTraceContext, Propagator propagator) {
     this.tracer = tracer;
@@ -40,20 +34,13 @@ public class ReactiveTracingMessageConsumerInterceptor implements ReactiveMessag
                              ReactiveMessageHandlerDecoratorChain decoratorChain) {
 
     Mono<Object> source = Mono.defer(() -> Mono.from(decoratorChain.next(subscriberIdAndMessage)));
-    return new ConsumerMonoOperator(source, subscriberIdAndMessage, this.tracer, this.currentTraceContext(), this.propagator);
+    return new ConsumerMonoOperator(source, subscriberIdAndMessage, this.tracer, this.currentTraceContext, this.propagator);
 
   }
 
   @Override
   public int getOrder() {
     return 0;
-  }
-
-  CurrentTraceContext currentTraceContext() {
-    if (this.currentTraceContext == null) {
-      this.currentTraceContext = this.applicationContext.getBean(CurrentTraceContext.class);
-    }
-    return this.currentTraceContext;
   }
 
 }

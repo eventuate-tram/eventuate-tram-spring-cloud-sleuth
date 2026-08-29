@@ -15,6 +15,7 @@ dependencies {
     testImplementation "org.springframework.boot:spring-boot-starter-data-r2dbc-test:$springBootVersion"
     testImplementation "org.springframework.boot:spring-boot-starter-jdbc-test:$springBootVersion"
 
+    testImplementation "tools.jackson.core:jackson-databind:$jacksonVersion"
     testImplementation "org.apache.commons:commons-lang3:$commonsLang3Version"
 
     testImplementation "io.eventuate.tram.core:eventuate-tram-spring-reactive-events-publisher"
